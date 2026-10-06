@@ -60,10 +60,17 @@ jobs:
         working-directory: example
         run: npm install --no-save ../${{ steps.pack.outputs.TARBALL }}
 
+      - name: Export
+        working-directory: example
+        env:
+          BASE_PATH: ${{ steps.pages.outputs.base_path }}
+          BASE_URL: ${{ steps.pages.outputs.base_url }}
+        run: npm run build:web
+
       - name: Generate sitemap
         run: |
           LASTMOD="$(git log -1 --format=%cs)"
-          cat > frontend/app/public/sitemap.xml <<EOF
+          cat > example/dist/sitemap.xml <<EOF
           <?xml version="1.0" encoding="UTF-8"?>
           <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
             <url>
@@ -72,14 +79,7 @@ jobs:
             </url>
           </urlset>
           EOF
-          cat frontend/app/public/sitemap.xml
-
-      - name: Export (Expo Web)
-        working-directory: example
-        env:
-          BASE_PATH: ${{ steps.pages.outputs.base_path }}
-          BASE_URL: ${{ steps.pages.outputs.base_url }}
-        run: npm run build:web
+          cat example/dist/sitemap.xml
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v5
