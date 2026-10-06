@@ -19,16 +19,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Setup Node
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@v6
         with:
-          node-version: 20
+          node-version: 24
 
       - name: Setup Pages
         id: pages
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@v6
 
       - name: Install deps (package)
         run: npm ci
@@ -60,6 +60,20 @@ jobs:
         working-directory: example
         run: npm install --no-save ../${{ steps.pack.outputs.TARBALL }}
 
+      - name: Generate sitemap
+        run: |
+          LASTMOD="$(git log -1 --format=%cs)"
+          cat > frontend/app/public/sitemap.xml <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+            <url>
+              <loc>https://europanite.github.io/banner-slot/</loc>
+              <lastmod>${LASTMOD}</lastmod>
+            </url>
+          </urlset>
+          EOF
+          cat frontend/app/public/sitemap.xml
+
       - name: Export (Expo Web)
         working-directory: example
         env:
@@ -68,7 +82,7 @@ jobs:
         run: npm run build:web
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v4
+        uses: actions/upload-pages-artifact@v5
         with:
           path: example/dist
 
@@ -81,4 +95,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
